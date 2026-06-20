@@ -1,0 +1,41 @@
+本项目是一个基于 DeepSeek API、Python、Pandas、Matplotlib、Chroma 和 Streamlit 的多智能体系统。
+
+系统支持 CSV 数据分析和 RAG 知识库问答两类核心任务。
+
+CSV 数据分析模块支持用户上传 CSV 文件，系统会自动识别数值列和分类列，并完成基础统计分析。
+
+系统可以计算数值列的数量、总和、平均值、最大值和最小值。
+
+系统可以按照分类字段进行分组统计，例如按照产品统计销售额、按照地区统计销售额、按照班级统计成绩。
+
+系统使用 Matplotlib 自动生成柱状图，并将图表保存到 charts 文件夹。
+
+系统使用 DeepSeek API 根据结构化分析结果生成中文数据分析报告。
+
+RAG 模块支持上传本地 txt 或 md 文档，系统会将文档切分为多个 chunk，并使用 embedding 模型进行向量化。
+
+系统使用 Chroma 作为本地向量数据库，支持根据用户问题检索相关资料片段。
+
+系统最终会将检索到的资料片段传递给 DeepSeek，由大模型基于资料生成回答。
+
+项目使用 Streamlit 搭建网页界面，支持任务输入、CSV 上传、知识库问答、分析报告展示和结果输出。
+
+项目使用 .env 文件管理 DeepSeek API Key，避免密钥直接写在代码中。
+
+本项目采用多智能体协作思想，将系统拆分为 Planner Agent、Executor Agent、Critic Agent 和 Reporter Agent。
+
+Planner Agent 负责任务规划，根据用户输入判断任务属于 CSV 数据分析、RAG 知识库问答还是普通对话。
+
+Executor Agent 负责调用具体工具，例如 CSV 分析工具、RAG 检索工具或普通对话能力。
+
+Critic Agent 负责对执行结果进行检查，判断结果是否合理、清晰，并给出改进建议。
+
+Reporter Agent 负责将执行结果整理成结构清晰的最终报告。
+
+本项目体现了 Agent 的基本思想：大模型负责理解任务、规划流程和生成内容，Python 工具负责执行真实的数据分析和知识检索任务。
+
+项目的核心流程为：用户输入任务，Planner Agent 判断任务类型，Executor Agent 调用对应工具，Critic Agent 评审结果，Reporter Agent 生成最终报告，并通过 Streamlit 页面展示。
+
+项目技术栈包括 Python、DeepSeek API、Streamlit、Pandas、Matplotlib、ChromaDB、Sentence Transformers、RAG 和 Multi-Agent。
+
+本项目可以进一步扩展为支持 Excel 文件分析、SQL 数据库查询、多轮对话记忆、PDF 报告导出和云端部署的智能数据分析平台。
