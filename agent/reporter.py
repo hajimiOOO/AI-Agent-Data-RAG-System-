@@ -1,11 +1,14 @@
 import os
 
 
-def save_html_report(report_content: str, chart_files: list[str]) -> str:
+def save_html_report(report_content: str, chart_files: list[str] | None = None) -> str:
     """
     将最终分析内容和图表保存为 HTML 报告。
     """
     os.makedirs("output", exist_ok=True)
+
+    if chart_files is None:
+        chart_files = []
 
     report_file = "output/report.html"
 
@@ -13,13 +16,16 @@ def save_html_report(report_content: str, chart_files: list[str]) -> str:
 
     chart_html = ""
 
-    for chart_file in chart_files:
-        chart_html += f"""
-        <div class="chart-card">
-            <h3>{chart_file}</h3>
-            <img src="../{chart_file}" alt="{chart_file}">
-        </div>
-        """
+    if chart_files:
+        chart_html += "<h2>图表展示</h2>"
+
+        for chart_file in chart_files:
+            chart_html += f"""
+            <div class="chart-card">
+                <h3>{chart_file}</h3>
+                <img src="../{chart_file}" alt="{chart_file}">
+            </div>
+            """
 
     html = f"""
 <!DOCTYPE html>
@@ -48,6 +54,15 @@ def save_html_report(report_content: str, chart_files: list[str]) -> str:
         h1 {{
             text-align: center;
             color: #2c3e50;
+        }}
+
+        h2 {{
+            color: #34495e;
+            margin-top: 30px;
+        }}
+
+        .report-content {{
+            font-size: 16px;
         }}
 
         .chart-card {{
@@ -82,7 +97,6 @@ def save_html_report(report_content: str, chart_files: list[str]) -> str:
             {formatted_content}
         </div>
 
-        <h2>图表展示</h2>
         {chart_html}
 
         <div class="footer">
@@ -101,10 +115,16 @@ def save_html_report(report_content: str, chart_files: list[str]) -> str:
 
 def generate_report(client, task_type: str, execution_result: str) -> str:
     """
-    Reporter Agent：根据执行结果生成最终报告。
+    Reporter Agent：根据 Executor Agent 的执行结果生成最终报告。
+
+    支持任务类型：
+    - csv：CSV 数据分析
+    - rag：知识库问答
+    - mysql：MySQL 查询
+    - chat：普通对话
     """
     prompt = f"""
-请根据下面的执行结果，生成一份清晰、专业的中文报告。
+请根据下面的执行结果，生成一份清晰、专业、适合展示的中文报告。
 
 任务类型：
 {task_type}
@@ -112,10 +132,39 @@ def generate_report(client, task_type: str, execution_result: str) -> str:
 执行结果：
 {execution_result}
 
+请根据不同任务类型生成对应内容：
+
+1. 如果任务类型是 csv：
+请输出：
+- 数据概览
+- 核心指标
+- 分组统计发现
+- 图表含义说明
+- 业务建议
+
+2. 如果任务类型是 rag：
+请输出：
+- 用户问题的直接回答
+- 回答依据
+- 如果资料不足，请明确说明资料中没有提到，不能编造
+
+3. 如果任务类型是 mysql：
+请输出：
+- 用户查询意图
+- 生成 SQL 的作用说明
+- 查询结果解读
+- 数据分析结论
+- 业务含义或建议
+
+4. 如果任务类型是 chat：
+请自然、清晰地回答用户问题。
+
 要求：
-- 如果是数据分析任务，请输出数据概览、核心指标、关键发现和建议。
-- 如果是知识库问答任务，请清晰回答问题，并说明依据。
-- 如果是普通对话，请自然回答。
+- 使用中文
+- 结构清晰
+- 不要编造执行结果里没有的信息
+- 不要输出 Markdown 表格，尽量用分点说明
+- 语气专业但容易理解
 """
 
     response = client.chat.completions.create(
@@ -123,7 +172,7 @@ def generate_report(client, task_type: str, execution_result: str) -> str:
         messages=[
             {
                 "role": "system",
-                "content": "你是一个专业报告生成 Agent。",
+                "content": "你是一个专业的数据分析与报告生成 Agent，擅长把工具执行结果整理成清晰报告。",
             },
             {
                 "role": "user",

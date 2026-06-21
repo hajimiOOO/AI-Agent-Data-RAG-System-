@@ -4,6 +4,7 @@ from openai import OpenAI
 
 from tools.csv_analyzer import analyze_csv_with_chart
 from tools.rag_tool import answer_with_rag
+from tools.mysql_tool import run_mysql_agent
 from rag.vector_store import retrieve_chunks
 
 
@@ -57,6 +58,18 @@ def execute_task(
             "raw": {
                 "retrieved_chunks": chunks,
             },
+        }
+
+    if task_type == "mysql":
+        mysql_result = run_mysql_agent(
+            client=client,
+            question=user_input,
+        )
+
+        return {
+            "type": "mysql",
+            "result": json.dumps(mysql_result, ensure_ascii=False, indent=2),
+            "raw": mysql_result,
         }
 
     response = client.chat.completions.create(

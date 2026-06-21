@@ -176,6 +176,32 @@ if st.button("🚀 执行 Agent"):
                 with st.expander(f"资料片段 {i}"):
                     st.write(chunk)
 
+    elif task_type == "mysql":
+        st.subheader("🧾 生成的 MySQL 查询语句")
+
+        generated_sql = raw.get("generated_sql", "")
+        st.code(generated_sql, language="sql")
+
+        query_result = raw.get("query_result", {})
+
+        if "error" in query_result:
+            st.error(query_result["error"])
+        else:
+            st.subheader("📊 MySQL 查询结果")
+
+            data = query_result.get("data", [])
+            row_count = query_result.get("row_count", 0)
+
+            if data:
+                st.dataframe(data, use_container_width=True)
+            else:
+                st.info("查询成功，但没有返回数据。")
+
+            st.caption(f"本次查询返回 {row_count} 行数据。")
+
+        with st.expander("查看完整 MySQL Agent 执行信息"):
+            st.json(raw)
+
     else:
         st.write(result)
 
